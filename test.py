@@ -13,8 +13,8 @@
 import pygame
 
 # Constants
-WIDTH = 600
-HEIGHT = 600
+WIDTH = 800
+HEIGHT = 800
 GRID_SIZE = 5
 SCORE_AREA_HEIGHT = 100
 SQUARE_SIZE = WIDTH // GRID_SIZE
@@ -23,6 +23,14 @@ SQUARE_SIZE = WIDTH // GRID_SIZE
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
+# WHITE = (238,238,210)
+# GRAY = (118,150,86)
+# WHITE = "#e2e2e2"
+# GRAY = "#00695C"
+
+
+# GRAY = "#00695C"
+# #aa9b83
 GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
 
@@ -47,9 +55,11 @@ def draw_score_area():
 # Get the cell indices based on mouse position
 def get_cell_indices(mouse_pos):
     x, y = mouse_pos
-    row = y // SQUARE_SIZE
+    row = y // SQUARE_SIZE  
     col = x // SQUARE_SIZE
     return row, col
+
+clock = pygame.time.Clock()
 
 # Main game loop
 running = True
@@ -74,5 +84,6 @@ while running:
         pygame.draw.rect(screen, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
 
     pygame.display.update()
+    # clock.tick(50)
 
 pygame.quit()

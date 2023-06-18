@@ -182,6 +182,7 @@ def check_lose(player):
         (-1 < currentRow+1 and currentRow+1 < BOARD_ROWS and -1 < currentCol-1 and currentCol-1 < BOARD_COLS and board[currentRow+1][currentCol-1] == 0 and sp_move>0) or
         (-1 < currentRow+1 and currentRow+1 < BOARD_ROWS and -1 < currentCol+1 and currentCol+1 < BOARD_COLS and board[currentRow+1][currentCol+1] == 0 and sp_move>0) 
     )
+
 def check_special(row ,col,player):
     global HU
     global AI

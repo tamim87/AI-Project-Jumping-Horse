@@ -13,6 +13,16 @@ LINE_WIDTH = 10
 BOARD_ROWS = 5
 BOARD_COLS = BOARD_ROWS
 SQUARE_SIZE = WIDTH/BOARD_ROWS
+SCORE_AREA_HEIGHT = 100
+
+# # Colors
+BLACK = (0, 0, 0)
+# WHITE = (255, 255, 255)
+# GRAY = (128, 128, 128)
+WHITE = (238,238,210)
+GRAY = (118,150,86)
+# # WHITE = "#e2e2e2"
+# # GRAY = "#00695C"
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -20,22 +30,21 @@ BG_COLOR = (199, 168, 97)
 # BG_COLOR = "#a39489"
 
 LINE_COLOR = (82, 68, 38)
-WHITE = (239, 231, 200)
+# WHITE = (239, 231, 200)
 
 AI=1
 HU=1
 
 
 
-# WHITE_HORSE = pygame.image.load(r"Isolation Game\white_horse.png")
 WHITE_HORSE = pygame.image.load(r"white_horse.png")
 WHITE_HORSE = pygame.transform.scale(WHITE_HORSE, (150,150))
 
 BLACK_HORSE = pygame.image.load(r"black_horse.png")
 BLACK_HORSE = pygame.transform.scale(BLACK_HORSE, (150,150))
 
-GRAY_HORSE = pygame.image.load(r"gray_horse.png")
-GRAY_HORSE = pygame.transform.scale(GRAY_HORSE, (155,155))
+GRAY_HORSE = pygame.image.load(r"cross.png")
+GRAY_HORSE = pygame.transform.scale(GRAY_HORSE, (160,160))
 
 GAME_OVER = pygame.image.load(r"green_horse.png")
 GAME_OVER = pygame.transform.scale(GAME_OVER, (160,160))
@@ -57,9 +66,9 @@ losePlayer = 0
 
 
 # SCREEN
-screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
+screen = pygame.display.set_mode( (WIDTH, HEIGHT + SCORE_AREA_HEIGHT) )
 pygame.display.set_caption( 'Horse Jump' )
-screen.fill( BG_COLOR )
+# screen.fill( BG_COLOR )
 
 
 # CONSOLE BOARD
@@ -73,16 +82,28 @@ playerTwoCurrentRow = -1
 playerTwoCurrentCol = -1
 
 
+# Draw the chessboard
+def draw_chessboard():
+    for row in range(BOARD_ROWS):
+        for col in range(BOARD_ROWS):
+            x = col * SQUARE_SIZE
+            y = row * SQUARE_SIZE
+            color = WHITE if (row + col) % 2 == 0 else GRAY
+            pygame.draw.rect(screen, color, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+
+def draw_score_area():
+    pygame.draw.rect(screen, WHITE, (0, HEIGHT, WIDTH, SCORE_AREA_HEIGHT))
+
 # FUNCTIONS
-def draw_lines():
+# def draw_lines():
 
-    for i in range(1,BOARD_ROWS):
-        # horizontal
-        pygame.draw.line( screen, LINE_COLOR, (0, SQUARE_SIZE*i), (WIDTH, SQUARE_SIZE*i), LINE_WIDTH )
+#     for i in range(1,BOARD_ROWS):
+#         # horizontal
+#         pygame.draw.line( screen, LINE_COLOR, (0, SQUARE_SIZE*i), (WIDTH, SQUARE_SIZE*i), LINE_WIDTH )
 
-    for i in range(1,BOARD_COLS):
-        # vertical
-        pygame.draw.line( screen, LINE_COLOR, (i * SQUARE_SIZE, 0), (i * SQUARE_SIZE, HEIGHT), LINE_WIDTH )
+#     for i in range(1,BOARD_COLS):
+#         # vertical
+#         pygame.draw.line( screen, LINE_COLOR, (i * SQUARE_SIZE, 0), (i * SQUARE_SIZE, HEIGHT), LINE_WIDTH )
 
 
 def draw_figures():
@@ -106,6 +127,7 @@ def draw_figures():
                     screen.blit(WHITE_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
                 else:
                     screen.blit(GRAY_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+    pygame.display.update()
 
 
 def mark_square(row, col, player):
@@ -182,6 +204,7 @@ def check_lose(player):
         (-1 < currentRow+1 and currentRow+1 < BOARD_ROWS and -1 < currentCol-1 and currentCol-1 < BOARD_COLS and board[currentRow+1][currentCol-1] == 0 and sp_move>0) or
         (-1 < currentRow+1 and currentRow+1 < BOARD_ROWS and -1 < currentCol+1 and currentCol+1 < BOARD_COLS and board[currentRow+1][currentCol+1] == 0 and sp_move>0) 
     )
+
 def check_special(row ,col,player):
     global HU
     global AI
@@ -208,8 +231,8 @@ def check_special(row ,col,player):
 
 
 def restart():
-    screen.fill( BG_COLOR )
-    draw_lines()
+    # screen.fill( BG_COLOR )
+    draw_chessboard()
     global AI
     global HU
     AI=1
@@ -389,6 +412,7 @@ scores = {
   2: -10,
   0: 0
 }
+
 # depth not use because the depth is not const value and it change when any player make his move and the  depth in the code handled by
 # check_lose(player)
 def minimax(board, player, playerOneCurrentRow, playerOneCurrentCol, playerTwoCurrentRow, playerTwoCurrentCol , depth, isMaximizing):
@@ -609,36 +633,41 @@ def minimax(board, player, playerOneCurrentRow, playerOneCurrentCol, playerTwoCu
 
 
 
-
-draw_lines()
-
-font = pygame.font.Font(None, 36)
-
-
 # Get the cell indices based on mouse position
 def get_cell_indices(mouse_pos):
     x, y = mouse_pos
-    row = y // SQUARE_SIZE
+    row = y // SQUARE_SIZE  
     col = x // SQUARE_SIZE
     return row, col
 
+clock = pygame.time.Clock()
+
+# draw_lines()
+
+font = pygame.font.Font(None, 36)
+# screen.fill( BG_COLOR )
+# draw_lines()
+draw_chessboard()
+draw_score_area()
 
 # MAINLOOP---------
 while True:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
 
-        
-        mouse_pos = pygame.mouse.get_pos()
-        if HEIGHT > mouse_pos[1] >= 0:
-        row, col = get_cell_indices(mouse_pos)
-        x = col * SQUARE_SIZE
-        y = row * SQUARE_SIZE
-        # if (row + col) % 2 == 0:
-            # pygame.draw.rect(screen, YELLOW, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-        # else:
-        pygame.draw.rect(screen, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+        # if event.type == pygame.MOUSEMOTION:
+        #     # mouse_pos = pygame.mouse.get_pos()
+        #     mouse_pos = event.pos
+        #     if HEIGHT > mouse_pos[1] >= 0:
+        #         row, col = get_cell_indices(mouse_pos)
+        #         x = col * SQUARE_SIZE
+        #         y = row * SQUARE_SIZE
+        #         # if (row + col) % 2 == 0:
+        #             # pygame.draw.rect(screen, YELLOW, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+        #         # else:
+        #         pygame.draw.rect(screen, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
 
 
 
@@ -696,7 +725,23 @@ while True:
             
             elif event.key == pygame.K_q:
                 pygame.display.quit()
-                sys.exit()
+                sys.exit()  
+        
+
+    
 
 
+    # # Handle cell hover
+    # mouse_pos = pygame.mouse.get_pos()
+    # if HEIGHT > mouse_pos[1] >= 0:
+    #     row, col = get_cell_indices(mouse_pos)
+    #     x = col * SQUARE_SIZE
+    #     y = row * SQUARE_SIZE
+    #     # if (row + col) % 2 == 0:
+    #         # pygame.draw.rect(screen, YELLOW, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+    #     # else:
+    #     pygame.draw.rect(screen, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
+
+    
     pygame.display.update()
+    # clock.tick(50)    
