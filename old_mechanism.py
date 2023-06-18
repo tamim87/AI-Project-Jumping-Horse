@@ -43,20 +43,20 @@ WHITE_HORSE = pygame.transform.scale(WHITE_HORSE, (150,150))
 BLACK_HORSE = pygame.image.load(r"black_horse.png")
 BLACK_HORSE = pygame.transform.scale(BLACK_HORSE, (150,150))
 
-GRAY_HORSE = pygame.image.load(r"cross.png")
+GRAY_HORSE = pygame.image.load(r"red_cross.png")
 GRAY_HORSE = pygame.transform.scale(GRAY_HORSE, (160,160))
 
 GAME_OVER = pygame.image.load(r"green_horse.png")
-GAME_OVER = pygame.transform.scale(GAME_OVER, (160,160))
+GAME_OVER = pygame.transform.scale(GAME_OVER, (100,100))
 
 RED_HORSE = pygame.image.load(r"red_horse.png")
 RED_HORSE = pygame.transform.scale(RED_HORSE, (160,160))
 
 LOSE = pygame.image.load(r"lose.png")
-LOSE = pygame.transform.scale(LOSE, (160,120))
+LOSE = pygame.transform.scale(LOSE, (100,100))
 
 WIN = pygame.image.load(r"win.png")
-WIN = pygame.transform.scale(WIN, (160,120))
+WIN = pygame.transform.scale(WIN, (130,100))
 
 
 # VARIABLES
@@ -112,8 +112,8 @@ def draw_figures():
             if board[row][col] == 1:
                 if (row == playerOneCurrentRow and col == playerOneCurrentCol and losePlayer == 1 ):    #player1 lost UI
                     screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                    screen.blit(GAME_OVER, (320,320))
-                    screen.blit(LOSE, (320,480))
+                    screen.blit(GAME_OVER, (160,800))
+                    screen.blit(LOSE, (480,800))
                 elif (row == playerOneCurrentRow and col == playerOneCurrentCol):
                     screen.blit(BLACK_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
                 else:
@@ -121,8 +121,8 @@ def draw_figures():
             elif board[row][col] == 2:
                 if (row == playerTwoCurrentRow and col == playerTwoCurrentCol and losePlayer == 2 ):    #player2 lost UI
                     screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                    screen.blit(GAME_OVER, (320,320))
-                    screen.blit(WIN, (320,480))
+                    screen.blit(GAME_OVER, (160,800))
+                    screen.blit(WIN, (480,800))
                 elif (row == playerTwoCurrentRow and col == playerTwoCurrentCol):
                     screen.blit(WHITE_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
                 else:
@@ -233,6 +233,7 @@ def check_special(row ,col,player):
 def restart():
     # screen.fill( BG_COLOR )
     draw_chessboard()
+    draw_score_area()
     global AI
     global HU
     AI=1
