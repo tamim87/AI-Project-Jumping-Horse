@@ -13,7 +13,9 @@ LINE_WIDTH = 10
 BOARD_ROWS = 5
 BOARD_COLS = BOARD_ROWS
 SQUARE_SIZE = WIDTH/BOARD_ROWS
-SCORE_AREA_HEIGHT = 100
+SCORE_AREA_HEIGHT = 200
+# font = pygame.font.Font('JetBrainsMono-Regular.ttf', 25)
+font = pygame.font.Font('NotoMono-Regular.ttf', 25)
 
 # # Colors
 BLACK = (0, 0, 0)
@@ -24,12 +26,12 @@ GRAY = (118,150,86)
 # # WHITE = "#e2e2e2"
 # # GRAY = "#00695C"
 
-RED = (255, 0, 0)
+OFFWHITE = (238,238,225)
 GREEN = (0, 255, 0)
-BG_COLOR = (199, 168, 97)
+# BG_COLOR = (199, 168, 97)
 # BG_COLOR = "#a39489"
 
-LINE_COLOR = (82, 68, 38)
+# LINE_COLOR = (82, 68, 38)
 # WHITE = (239, 231, 200)
 
 AI=1
@@ -70,7 +72,6 @@ screen = pygame.display.set_mode( (WIDTH, HEIGHT + SCORE_AREA_HEIGHT) )
 pygame.display.set_caption( 'Horse Jump' )
 # screen.fill( BG_COLOR )
 
-
 # CONSOLE BOARD
 board = np.zeros( (BOARD_ROWS, BOARD_COLS) )
 
@@ -81,6 +82,8 @@ playerOneCurrentCol = -1
 playerTwoCurrentRow = -1
 playerTwoCurrentCol = -1
 
+def clear_area(color,top,left,w,h):
+    pygame.draw.rect(screen, color, (top, left, w, h))
 
 # Draw the chessboard
 def draw_chessboard():
@@ -92,11 +95,33 @@ def draw_chessboard():
             pygame.draw.rect(screen, color, (x, y, SQUARE_SIZE, SQUARE_SIZE))
 
 def draw_score_area():
-    pygame.draw.rect(screen, WHITE, (0, HEIGHT, WIDTH, SCORE_AREA_HEIGHT))
+    pygame.draw.rect(screen, OFFWHITE, (0, 800, WIDTH, SCORE_AREA_HEIGHT))
+
+def draw_figures():
+    for row in range(BOARD_ROWS):
+        for col in range(BOARD_COLS):
+            if board[row][col] == 1:
+                if (row == playerOneCurrentRow and col == playerOneCurrentCol and losePlayer == 1 ):    #player1 lost UI
+                    screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+                    screen.blit(GAME_OVER, (660,800))
+                    screen.blit(LOSE, (480,800))
+                elif (row == playerOneCurrentRow and col == playerOneCurrentCol):
+                    screen.blit(BLACK_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+                else:
+                    screen.blit(GRAY_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+            elif board[row][col] == 2:
+                if (row == playerTwoCurrentRow and col == playerTwoCurrentCol and losePlayer == 2 ):    #player2 lost UI
+                    screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+                    screen.blit(GAME_OVER, (660,800))
+                    screen.blit(WIN, (480,800))
+                elif (row == playerTwoCurrentRow and col == playerTwoCurrentCol):
+                    screen.blit(WHITE_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+                else:
+                    screen.blit(GRAY_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+    pygame.display.update()
 
 # FUNCTIONS
 # def draw_lines():
-
 #     for i in range(1,BOARD_ROWS):
 #         # horizontal
 #         pygame.draw.line( screen, LINE_COLOR, (0, SQUARE_SIZE*i), (WIDTH, SQUARE_SIZE*i), LINE_WIDTH )
@@ -106,37 +131,12 @@ def draw_score_area():
 #         pygame.draw.line( screen, LINE_COLOR, (i * SQUARE_SIZE, 0), (i * SQUARE_SIZE, HEIGHT), LINE_WIDTH )
 
 
-def draw_figures():
-    for row in range(BOARD_ROWS):
-        for col in range(BOARD_COLS):
-            if board[row][col] == 1:
-                if (row == playerOneCurrentRow and col == playerOneCurrentCol and losePlayer == 1 ):    #player1 lost UI
-                    screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                    screen.blit(GAME_OVER, (160,800))
-                    screen.blit(LOSE, (480,800))
-                elif (row == playerOneCurrentRow and col == playerOneCurrentCol):
-                    screen.blit(BLACK_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                else:
-                    screen.blit(GRAY_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-            elif board[row][col] == 2:
-                if (row == playerTwoCurrentRow and col == playerTwoCurrentCol and losePlayer == 2 ):    #player2 lost UI
-                    screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                    screen.blit(GAME_OVER, (160,800))
-                    screen.blit(WIN, (480,800))
-                elif (row == playerTwoCurrentRow and col == playerTwoCurrentCol):
-                    screen.blit(WHITE_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                else:
-                    screen.blit(GRAY_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-    pygame.display.update()
-
-
 def mark_square(row, col, player):
     board[row][col] = player
     print ("----------------------------------------------------")
     print("Player " + str(player) + " marked square : (" + str(row) + "," + str(col) + ")")
     print(board)
     print ("----------------------------------------------------")
-
 
 def available_square(row, col, player):
     if(player == 1): 
@@ -643,9 +643,6 @@ def get_cell_indices(mouse_pos):
 
 clock = pygame.time.Clock()
 
-# draw_lines()
-
-font = pygame.font.Font(None, 36)
 # screen.fill( BG_COLOR )
 # draw_lines()
 draw_chessboard()
@@ -684,6 +681,9 @@ while True:
             print('Clicked row: ' + str(clicked_row))
             print('Clicked col: ' + str(clicked_col))
 
+            if clicked_row >= 5:
+                continue
+            
             if available_square( clicked_row, clicked_col, 1 ):
                 player = 1
                 check_special(clicked_row,clicked_col,player)
@@ -727,7 +727,28 @@ while True:
             elif event.key == pygame.K_q:
                 pygame.display.quit()
                 sys.exit()  
-        
+    
+
+    ai_sp_surf = font.render('AI SP Move: ' + str(AI),True,'Black')
+    ai_sp_rect = ai_sp_surf.get_rect(midleft=(10,865))
+    hu_sp_surf = font.render('Human SP Move: ' + str(HU),True,'Black')
+    hu_sp_rect = hu_sp_surf.get_rect(midleft=(10,925))
+    
+    screen.blit(ai_sp_surf,ai_sp_rect)
+    screen.blit(hu_sp_surf,hu_sp_rect)
+
+
+
+    ai_turn_surf = font.render('AI Turn',True,'Black')
+    ai_turn_rect = ai_turn_surf.get_rect(midleft=(320,865))
+    hu_turn_surf = font.render('Human Turn',True,'Black')
+    hu_turn_rect = hu_turn_surf.get_rect(midleft=(320,925))
+    
+    screen.blit(ai_turn_surf,ai_turn_rect)
+    screen.blit(hu_turn_surf,hu_turn_rect)
+
+    # clear_area(OFFWHITE,0,160,160,160)
+
 
     
 

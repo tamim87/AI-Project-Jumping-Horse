@@ -83,6 +83,8 @@ while running:
         # else:
         pygame.draw.rect(screen, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
 
+    fonts = pygame.font.get_fonts()
+    print(fonts)
     pygame.display.update()
     # clock.tick(50)
 
