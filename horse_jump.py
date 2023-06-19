@@ -4,7 +4,9 @@ import numpy as np
 
 # initialize pygame
 pygame.init()
-
+pygame.mixer.init()  # Initialize the mixer
+click_sound = pygame.mixer.Sound("arcade-game-jump.wav")
+# click_sound = pygame.mixer.Sound("mixkit-shotgun-hard-pump-1665.wav")
 
 # CONSTANTS
 WIDTH = 800
@@ -14,7 +16,6 @@ BOARD_ROWS = 5
 BOARD_COLS = BOARD_ROWS
 SQUARE_SIZE = WIDTH/BOARD_ROWS
 SCORE_AREA_HEIGHT = 200
-# font = pygame.font.Font('JetBrainsMono-Regular.ttf', 25)
 font = pygame.font.Font('NotoMono-Regular.ttf', 25)
 
 # # Colors
@@ -28,15 +29,9 @@ GRAY = (118,150,86)
 
 OFFWHITE = (238,238,225)
 GREEN = (0, 255, 0)
-# BG_COLOR = (199, 168, 97)
-# BG_COLOR = "#a39489"
-
-# LINE_COLOR = (82, 68, 38)
-# WHITE = (239, 231, 200)
 
 AI=1
 HU=1
-
 
 
 WHITE_HORSE = pygame.image.load(r"white_horse.png")
@@ -45,20 +40,35 @@ WHITE_HORSE = pygame.transform.scale(WHITE_HORSE, (150,150))
 BLACK_HORSE = pygame.image.load(r"black_horse.png")
 BLACK_HORSE = pygame.transform.scale(BLACK_HORSE, (150,150))
 
-GRAY_HORSE = pygame.image.load(r"red_cross.png")
-GRAY_HORSE = pygame.transform.scale(GRAY_HORSE, (160,160))
+RED_HORSE = pygame.image.load(r"red_horse.png")
+RED_HORSE = pygame.transform.scale(RED_HORSE, (160,160))
+
+RED_CROSS = pygame.image.load(r"red_cross.png")
+RED_CROSS = pygame.transform.scale(RED_CROSS, (160,160))
 
 GAME_OVER = pygame.image.load(r"green_horse.png")
 GAME_OVER = pygame.transform.scale(GAME_OVER, (100,100))
-
-RED_HORSE = pygame.image.load(r"red_horse.png")
-RED_HORSE = pygame.transform.scale(RED_HORSE, (160,160))
 
 LOSE = pygame.image.load(r"lose.png")
 LOSE = pygame.transform.scale(LOSE, (100,100))
 
 WIN = pygame.image.load(r"win.png")
 WIN = pygame.transform.scale(WIN, (130,100))
+
+ai_turn_surf = font.render('AI Turn',True,'Black')
+ai_turn_rect = ai_turn_surf.get_rect(midleft=(320,865))
+hu_turn_surf = font.render('Human Turn',True,'Black')
+hu_turn_rect = hu_turn_surf.get_rect(midleft=(320,925))
+
+reset_surf = font.render('Press R to Restart',True,'Black')
+reset_rect = reset_surf.get_rect(midleft=(500,925))
+
+quit_surf = font.render('Press Q to Quit',True,'Black')
+quit_rect = quit_surf.get_rect(midleft=(500,950))
+
+loading_surf = pygame.image.load(r"knight.jpg")
+loading_surf = pygame.transform.rotozoom(loading_surf, 0,0.5)
+loading_rect = loading_surf.get_rect(topleft=(0,0))
 
 
 # VARIABLES
@@ -70,7 +80,6 @@ losePlayer = 0
 # SCREEN
 screen = pygame.display.set_mode( (WIDTH, HEIGHT + SCORE_AREA_HEIGHT) )
 pygame.display.set_caption( 'Horse Jump' )
-# screen.fill( BG_COLOR )
 
 # CONSOLE BOARD
 board = np.zeros( (BOARD_ROWS, BOARD_COLS) )
@@ -103,32 +112,34 @@ def draw_figures():
             if board[row][col] == 1:
                 if (row == playerOneCurrentRow and col == playerOneCurrentCol and losePlayer == 1 ):    #player1 lost UI
                     screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                    screen.blit(GAME_OVER, (660,800))
-                    screen.blit(LOSE, (480,800))
+                    # if (row + col) % 2 == 0:
+                    #     pygame.draw.rect(screen, WHITE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE ), SQUARE_SIZE, SQUARE_SIZE))
+                    # else:
+                    #     pygame.draw.rect(screen, GRAY, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE ), SQUARE_SIZE, SQUARE_SIZE))
+                         
+                    screen.blit(GAME_OVER, (660,820))
+                    screen.blit(LOSE, (500,820))
                 elif (row == playerOneCurrentRow and col == playerOneCurrentCol):
+                    # screen.blit(ai_turn_surf,hu_turn_rect)
                     screen.blit(BLACK_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
                 else:
-                    screen.blit(GRAY_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+                    screen.blit(RED_CROSS, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
             elif board[row][col] == 2:
                 if (row == playerTwoCurrentRow and col == playerTwoCurrentCol and losePlayer == 2 ):    #player2 lost UI
+                    if (row + col) % 2 == 0:
+                        pygame.draw.rect(screen, WHITE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE ), SQUARE_SIZE, SQUARE_SIZE))
+                    else:
+                        pygame.draw.rect(screen, GRAY, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE ), SQUARE_SIZE, SQUARE_SIZE))
                     screen.blit(RED_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
-                    screen.blit(GAME_OVER, (660,800))
-                    screen.blit(WIN, (480,800))
+                    
+                    screen.blit(GAME_OVER, (660,820))
+                    screen.blit(WIN, (500,820))
                 elif (row == playerTwoCurrentRow and col == playerTwoCurrentCol):
                     screen.blit(WHITE_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
                 else:
-                    screen.blit(GRAY_HORSE, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
+                    screen.blit(RED_CROSS, (int( col * SQUARE_SIZE ), int( row * SQUARE_SIZE )))
     pygame.display.update()
 
-# FUNCTIONS
-# def draw_lines():
-#     for i in range(1,BOARD_ROWS):
-#         # horizontal
-#         pygame.draw.line( screen, LINE_COLOR, (0, SQUARE_SIZE*i), (WIDTH, SQUARE_SIZE*i), LINE_WIDTH )
-
-#     for i in range(1,BOARD_COLS):
-#         # vertical
-#         pygame.draw.line( screen, LINE_COLOR, (i * SQUARE_SIZE, 0), (i * SQUARE_SIZE, HEIGHT), LINE_WIDTH )
 
 def mark_square(row, col, player):
     board[row][col] = player
@@ -610,16 +621,6 @@ def minimax(board, player, playerOneCurrent_Row, playerOneCurrent_Col, playerTwo
         #print("BEST SCORE min HU= ",bestScore)
         return bestScore
 
-     
-
-
-    
-# scores = {
-#   1: 10,
-#   2: -10,
-#   0: 0
-# }
-
 
 
 # Get the cell indices based on mouse position
@@ -629,10 +630,6 @@ def get_cell_indices(mouse_pos):
     col = x // SQUARE_SIZE
     return row, col
 
-clock = pygame.time.Clock()
-
-# screen.fill( BG_COLOR )
-# draw_lines()
 draw_chessboard()
 draw_score_area()
 
@@ -642,19 +639,6 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-
-        # if event.type == pygame.MOUSEMOTION:
-        #     # mouse_pos = pygame.mouse.get_pos()
-        #     mouse_pos = event.pos
-        #     if HEIGHT > mouse_pos[1] >= 0:
-        #         row, col = get_cell_indices(mouse_pos)
-        #         x = col * SQUARE_SIZE
-        #         y = row * SQUARE_SIZE
-        #         # if (row + col) % 2 == 0:
-        #             # pygame.draw.rect(screen, YELLOW, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-        #         # else:
-        #         pygame.draw.rect(screen, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-
 
 
         if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
@@ -674,6 +658,7 @@ while True:
             
             if available_square( clicked_row, clicked_col, 1 ):
                 player = 1
+                click_sound.play()
                 #check this move is special move or not
                 check_special(clicked_row,clicked_col,player)
                 mark_square( clicked_row, clicked_col, player )
@@ -727,34 +712,18 @@ while True:
     
     screen.blit(ai_sp_surf,ai_sp_rect)
     screen.blit(hu_sp_surf,hu_sp_rect)
+    screen.blit(reset_surf,reset_rect)
+    screen.blit(quit_surf,quit_rect)
 
 
 
-    ai_turn_surf = font.render('AI Turn',True,'Black')
-    ai_turn_rect = ai_turn_surf.get_rect(midleft=(320,865))
-    hu_turn_surf = font.render('Human Turn',True,'Black')
-    hu_turn_rect = hu_turn_surf.get_rect(midleft=(320,925))
+    # ai_turn_surf = font.render('AI Turn',True,'Black')
+    # ai_turn_rect = ai_turn_surf.get_rect(midleft=(320,865))
+    # hu_turn_surf = font.render('Human Turn',True,'Black')
+    # hu_turn_rect = hu_turn_surf.get_rect(midleft=(320,925))
     
-    screen.blit(ai_turn_surf,ai_turn_rect)
-    screen.blit(hu_turn_surf,hu_turn_rect)
-
+    # screen.blit(ai_turn_surf,ai_turn_rect)
+    # screen.blit(hu_turn_surf,hu_turn_rect)
     # clear_area(OFFWHITE,0,160,160,160)
-
-
-    
-
-
-    # # Handle cell hover
-    # mouse_pos = pygame.mouse.get_pos()
-    # if HEIGHT > mouse_pos[1] >= 0:
-    #     row, col = get_cell_indices(mouse_pos)
-    #     x = col * SQUARE_SIZE
-    #     y = row * SQUARE_SIZE
-    #     # if (row + col) % 2 == 0:
-    #         # pygame.draw.rect(screen, YELLOW, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-    #     # else:
-    #     pygame.draw.rect(screen, GREEN, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-
     
     pygame.display.update()
-    # clock.tick(50)    
